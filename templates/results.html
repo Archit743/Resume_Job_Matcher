@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Results</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .min-h-screen {
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #B2D8D8, white);
+            padding: 2rem;
+        }
+
+        .max-w-7xl {
+            max-width: 80rem;
+            margin: 0 auto;
+            position: relative;
+        }
+
+
+        .back-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #2A4747;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .close-button:hover {
+            color: #8EC3C3;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2A4747;
+            margin: 3rem 0 1.5rem;
+        }
+
+        /* Skills section */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            border-radius: 9999px;
+            background-color: #B2D8D8;
+            color: #2A4747;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .skill-tag:hover {
+            background-color: #8EC3C3;
+        }
+
+        /* Cards container */
+        .cards-container {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .cards-wrapper {
+            display: flex;
+            gap: 1rem;
+            min-width: min-content;
+        }
+
+        /* Job Card */
+        .job-card {
+            display: inline-block;
+            width: 300px;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #B2D8D8;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .job-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.25rem);
+        }
+
+        /* Certification Card */
+        .cert-card {
+            display: inline-block;
+            width: 300px;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #B2D8D8;
+            transition: all 0.3s;
+        }
+
+        .cert-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-0.25rem);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: #2A4747;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* For Safari & Chrome */
+            line-clamp: 3;
+            /* Standard property */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .learn-more {
+            color: #B2D8D8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .learn-more:hover {
+            color: #8EC3C3;
+        }
+
+        /* Scrollbar styling */
+        .cards-container {
+            scrollbar-width: thin;
+            scrollbar-color: #B2D8D8 transparent;
+        }
+
+        .cards-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .cards-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .cards-container::-webkit-scrollbar-thumb {
+            background-color: #B2D8D8;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen">
+        <div class="max-w-7xl">
+            <a href="/home" class="back-button">Back to Home</a>
+
+            <h2 class="section-title">Your Top Skills</h2>
+            <div class="skills-container" id="skills-container"></div>
+
+            <h2 class="section-title">Predicted Job Category</h2>
+            <div class="predicted-category">
+                {% if predicted_category %}
+                <div class="job-card">
+                    <h3 class="card-title">{{ predicted_category }}</h3>
+                    <p class="card-description">Based on your resume content, this is the most suitable job category for
+                        your profile.</p>
+                </div>
+                {% else %}
+                <p>No prediction available</p>
+                {% endif %}
+            </div>
+
+
+            <h2 class="section-title">Recommended Jobs</h2>
+            <div class="cards-container">
+                <div class="cards-wrapper" id="jobs-container"></div>
+            </div>
+
+            <h2 class="section-title"></h2>
+            <div class="cards-container">
+                <div class="cards-wrapper" id="certs-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Declare variables only once
+        // Declare variables only once
+        const extract_skills = JSON.parse('{{ skills|tojson|safe }}' || '[]');
+        const extract_jobs = JSON.parse('{{ jobs|tojson|safe }}' || '[]');
+        const extract_certifications = JSON.parse('{{ certifications|tojson|safe }}' || '[]');
+        const predicted_category = '{{ predicted_category|safe if predicted_category else "" }}';
+
+
+        function createSkillTag(skill) {
+            const div = document.createElement('div');
+            div.className = 'skill-tag';
+            div.textContent = skill;
+            return div;
+        }
+
+        function createJobCard(job) {
+            const div = document.createElement('div');
+            div.className = 'job-card';
+            div.innerHTML = `
+        <h3 class="card-title">${job}</h3>
+        <p class="card-description">${getJobDescription(job)}</p>
+    `;
+            return div;
+        }
+
+        function createCertCard(cert) {
+            const div = document.createElement('div');
+            div.className = 'cert-card';
+            div.innerHTML = `
+        <h3 class="card-title">${cert}</h3>
+        <p class="card-description">${getCertDescription(cert)}</p>
+        <a href="#" class="learn-more">Learn More</a>
+    `;
+            return div;
+        }
+
+        // Simple description generators
+        function getJobDescription(jobTitle) {
+            const descriptions = {
+                "Python Developer": "Develop Python-based applications and services...",
+                "Data Engineer": "Design and maintain data infrastructure...",
+                "ML Engineer": "Build and deploy machine learning models...",
+                "Cloud Architect": "Design cloud infrastructure solutions..."
+            };
+            return descriptions[jobTitle] || "Exciting opportunity in your field of expertise.";
+        }
+
+        function getCertDescription(certName) {
+            const descriptions = {
+                "PCAP (Python Institute)": "Professional certification in Python programming...",
+                "AWS Certified Developer": "Validate AWS cloud development skills...",
+                "TensorFlow Developer Certificate": "Prove your ML implementation skills..."
+            };
+            return descriptions[certName] || "Valuable certification to enhance your career prospects.";
+        }
+
+        // Render skills
+        const skillsContainer = document.getElementById('skills-container');
+
+        if (extract_skills.length > 0) {
+            extract_skills.forEach(skill => {
+                skillsContainer.appendChild(createSkillTag(skill));
+            });
+        } else {
+            skillsContainer.innerHTML = "<p>No skills found.</p>";
+        }
+
+
+        // Render jobs
+        const jobsContainer = document.getElementById('jobs-container');
+        extract_jobs.forEach(job => {
+            jobsContainer.appendChild(createJobCard(job));
+        });
+
+        // Render certifications
+        const certsContainer = document.getElementById('certs-container');
+        extract_certifications.forEach(cert => {
+            certsContainer.appendChild(createCertCard(cert));
+        });
+
+    </script>
+</body>
+
+</html>

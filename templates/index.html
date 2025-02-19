@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Builder - Create Professional Resumes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2D7A7B;
+            --primary-dark: #236363;
+            --primary-light: #E6F7F7;
+            --text-dark: #1A202C;
+            --text-light: #4A5568;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, var(--white) 0%, var(--primary-light) 50%, var(--white) 100%);
+            min-height: 100vh;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-light);
+            z-index: 50;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--primary);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 40;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-buttons a {
+            text-decoration: none;
+            color: var(--white);
+        }
+
+        .login, .signup {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: var(--primary);
+            color: var(--white);
+            box-shadow: 0 4px 6px rgba(45, 122, 123, 0.2);
+        }
+
+        .login:hover, .signup:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(45, 122, 123, 0.3);
+        }
+
+        .main-content {
+            padding: 160px 20px 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero {
+            margin-bottom: 80px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            color: var(--text-dark);
+            margin-bottom: 32px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            color: var(--text-light);
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .hero p i {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .cta {
+            margin-top: 40px;
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: 600;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(45, 122, 123, 0.2);
+        }
+
+        .cta:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(45, 122, 123, 0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 80px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(45, 122, 123, 0.1);
+        }
+
+        .stats div {
+            padding: 20px;
+            border-radius: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .stats div:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats span {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stats p {
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .chat-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary);
+            color: var(--white);
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(45, 122, 123, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-button i {
+            font-size: 24px;
+        }
+
+        .chat-button:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(45, 122, 123, 0.4);
+        }
+
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .wave {
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(45, 122, 123, 0.1));
+            animation: waveMove 15s linear infinite;
+        }
+
+        @keyframes waveMove {
+            0% { transform: translateX(0) translateY(0) rotate(0); }
+            50% { transform: translateX(-25%) translateY(5px) rotate(1deg); }
+            100% { transform: translateX(-50%) translateY(0) rotate(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="progress-bar">
+        <div class="progress"></div>
+    </div>
+
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">
+                <i class="fas fa-file-alt"></i>
+                <span>AI Resume Builder</span>
+            </a>
+            <div class="nav-buttons">
+                <a href="/signup" class="login">Signup/Login</a>
+            </div>
+
+                    
+                
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="hero">
+            <h1>Create Your Perfect Resume<br>With AI-Powered Tools</h1>
+            <p><i class="fas fa-check-circle"></i> Create professional, ATS-friendly resumes with AI-powered tools</p>
+            <p><i class="fas fa-check-circle"></i> Tailored suggestions based on your industry and experience</p>
+            <p><i class="fas fa-check-circle"></i> Professional templates and real-time preview</p>
+            <button class="cta">Get Started Now</button>
+        </div>
+
+        <div class="stats">
+            <div>
+                <span>10,000+</span>
+                <p>Resumes Created</p>
+            </div>
+            <div>
+                <span>95%</span>
+                <p>Success Rate</p>
+            </div>
+            <div>
+                <span>24/7</span>
+                <p>AI Support</p>
+            </div>
+        </div>
+    </main>
+
+
+    <div class="wave-container">
+        <div class="wave"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const progressBar = document.querySelector(".progress");
+            const header = document.querySelector(".header");
+
+            window.addEventListener("scroll", function () {
+                let scrollY = window.scrollY;
+                let totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+                let scrollProgress = (scrollY / totalScroll) * 100;
+                progressBar.style.width = '${scrollProgress}';
+
+                if (scrollY > 0) {
+                    header.classList.add("scrolled");
+                } else {
+                    header.classList.remove("scrolled");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

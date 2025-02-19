@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Signup</title>
+    <style>
+        :root {
+            --primary: #2D7A7B;
+            --primary-dark: #236363;
+            --primary-light: #E6F7F7;
+            --text-dark: #1A202C;
+            --text-light: #4A5568;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, var(--white) 0%, var(--primary-light) 50%, var(--white) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 400px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(45, 122, 123, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--text-dark);
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 12px 0;
+            border: 2px solid var(--primary-light);
+            border-radius: 8px;
+            font-size: 16px;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(45, 122, 123, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(45, 122, 123, 0.2);
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(45, 122, 123, 0.3);
+        }
+
+        .switch {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 16px;
+            display: inline-block;
+            transition: color 0.3s ease;
+        }
+
+        .switch:hover {
+            color: var(--primary-dark);
+        }
+
+        .form-container {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-container.hidden {
+            display: none;
+            opacity: 0;
+        }
+
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .wave {
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(45, 122, 123, 0.1));
+            animation: waveMove 15s linear infinite;
+        }
+
+        @keyframes waveMove {
+            0% { transform: translateX(0) translateY(0) rotate(0); }
+            50% { transform: translateX(-25%) translateY(5px) rotate(1deg); }
+            100% { transform: translateX(-50%) translateY(0) rotate(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="signupForm" class="form-container">
+            <h2>Create Account</h2>
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="tel" id="phone" placeholder="Phone" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button onclick="submitSignup()">Sign Up</button>
+            <p class="switch" onclick="toggleForm('loginForm')">Already have an account? Login</p>
+        </div>
+        
+        <div id="loginForm" class="form-container hidden">
+            <h2>Welcome Back</h2>
+            <input type="text" id="email_or_phone" placeholder="Email or Phone" required>
+            <input type="password" id="login_password" placeholder="Password" required>
+            <button onclick="submitLogin()">Login</button>
+            <p class="switch" onclick="toggleForm('signupForm')">Don't have an account? Sign up</p>
+        </div>
+    </div>
+
+    <div class="wave-container">
+        <div class="wave"></div>
+    </div>
+
+    <script>
+        function toggleForm(formId) {
+            const signupForm = document.getElementById('signupForm');
+            const loginForm = document.getElementById('loginForm');
+            
+            if (formId === 'signupForm') {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+            } else {
+                signupForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            }
+        }
+
+        function submitSignup() {
+            const userData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                password: document.getElementById('password').value.trim()
+            };
+
+            fetch('/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    document.getElementById('name').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('phone').value = '';
+                    document.getElementById('password').value = '';
+                    toggleForm('loginForm');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function submitLogin() {
+            const loginData = {
+                email_or_phone: document.getElementById('email_or_phone').value.trim(),
+                password: document.getElementById('login_password').value.trim()
+            };
+            
+            fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/home';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

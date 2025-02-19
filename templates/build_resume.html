@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Your Resume</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2D7A7B;
+            --primary-dark: #236363;
+            --primary-light: #E6F7F7;
+            --text-dark: #1A202C;
+            --text-light: #4A5568;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--white) 0%, var(--primary-light) 50%, var(--white) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .container {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(45, 122, 123, 0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(45, 122, 123, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--white);
+            border-bottom: 2px solid var(--primary-light);
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .card-header h3 {
+            color: var(--primary);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .form-control {
+            border: 2px solid var(--primary-light);
+            border-radius: 8px;
+            padding: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(45, 122, 123, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-light);
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(45, 122, 123, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(45, 122, 123, 0.3);
+        }
+
+        .work-experience-entry, .education-entry {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .alert {
+            border-radius: 10px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .wave {
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(45, 122, 123, 0.1));
+            animation: waveMove 15s linear infinite;
+        }
+
+        @keyframes waveMove {
+            0% { transform: translateX(0) translateY(0) rotate(0); }
+            50% { transform: translateX(-25%) translateY(5px) rotate(1deg); }
+            100% { transform: translateX(-50%) translateY(0) rotate(0); }
+        }
+
+        /* Stagger animation for form sections */
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Build Your Professional Resume</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('generate_resume') }}" method="post">
+            <!-- Personal Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle me-2"></i>Personal Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="linkedin" class="form-label">LinkedIn Profile</label>
+                            <input type="url" class="form-control" id="linkedin" name="linkedin">
+                        </div>
+                        <div class="col-12">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" placeholder="City, State">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-briefcase me-2"></i>Professional Summary</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="professional_summary" class="form-label">Write a brief summary of your professional background</label>
+                        <textarea class="form-control" id="professional_summary" name="professional_summary" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Work Experience -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-building me-2"></i>Work Experience</h3>
+                    <button type="button" class="btn btn-secondary" onclick="addWorkExperience()">
+                        <i class="fas fa-plus me-2"></i>Add Experience
+                    </button>
+                </div>
+                <div class="card-body" id="work-experience-container">
+                    <div class="work-experience-entry mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Company Name</label>
+                                <input type="text" class="form-control" name="company_name[]">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Position</label>
+                                <input type="text" class="form-control" name="position[]">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Dates</label>
+                                <input type="text" class="form-control" name="work_dates[]" placeholder="MM/YYYY - MM/YYYY">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="work_description[]" rows="3" placeholder="Describe your responsibilities and achievements"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Education -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-graduation-cap me-2"></i>Education</h3>
+                    <button type="button" class="btn btn-secondary" onclick="addEducation()">
+                        <i class="fas fa-plus me-2"></i>Add Education
+                    </button>
+                </div>
+                <div class="card-body" id="education-container">
+                    <div class="education-entry mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Institution</label>
+                                <input type="text" class="form-control" name="institution[]">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Degree</label>
+                                <input type="text" class="form-control" name="degree[]">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Graduation Date</label>
+                                <input type="text" class="form-control" name="education_dates[]" placeholder="MM/YYYY">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">GPA</label>
+                                <input type="text" class="form-control" name="gpa[]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+           
+           
+            <!-- Skills -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-tools me-2"></i>Skills</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="skills" class="form-label">List your key skills (separate with commas)</label>
+                        <textarea class="form-control" id="skills" name="skills" rows="3" placeholder="e.g., Python, Project Management, Team Leadership"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-5">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-file-alt me-2"></i>Generate Resume
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="wave-container">
+        <div class="wave"></div>
+    </div>
+
+    <!-- Keep the existing JavaScript exactly as is -->
+    <script>
+        function addWorkExperience() {
+            const container = document.getElementById('work-experience-container');
+            const template = document.querySelector('.work-experience-entry').cloneNode(true);
+            
+            // Clear the input values
+            template.querySelectorAll('input, textarea').forEach(input => input.value = '');
+            
+            container.appendChild(template);
+        }
+
+        function addEducation() {
+            const container = document.getElementById('education-container');
+            const template = document.querySelector('.education-entry').cloneNode(true);
+            
+            // Clear the input values
+            template.querySelectorAll('input').forEach(input => input.value = '');
+            
+            container.appendChild(template);
+        }
+    </script>
+</body>
+</html>

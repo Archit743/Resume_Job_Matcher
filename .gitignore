@@ -1,0 +1,6 @@
+.env
+uploads/
+clf.pkl
+tfidf.pkl
+resume_skill_extractor.pkl
+encoder.pkl
